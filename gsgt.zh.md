@@ -1,6 +1,6 @@
-# 标题：正方形的图形：Gfx-rs 教程
+Title: 正方形的图形：Gfx-rs 教程
 
-我正在制作一个小玩具，来更好地理解 gfx-rs。但作为副产品，我也写了这个能帮助其他人学习 gfx-rs 的小教程。
+我正在制作一个小玩具，来更好地理解 gfx-rs。但作为玩具的附属品，我也写了这个能帮助其他人学习 gfx-rs 的小教程。
 
 ## 入门
 
@@ -69,7 +69,7 @@ pub fn main() {
 }
 ```
 
-如您所见，我们使用 gfx，配上 glutin 和 OpenGL。简言之，代码的作用如下：
+如您所见，我们会使用 gfx，并配上 glutin 和 OpenGL。简言之，代码的作用如下：
 
 1.  创建一个事件循环，并准备创建一个标题为“Square Toy”的窗口
 2.  运行`gfx_window_glutin::init()`得到`glutin::Window`，`gfx_device_gl::Device`和一堆或其他的东西
@@ -82,26 +82,26 @@ pub fn main() {
     4.  由于我们的缓冲至少是两倍，因此可以切换缓冲区
     5.  清理
 
-好了！无论你使用什么，它只是简单画一个什么都没有的黑色屏幕。不幸的是，绘制其他东西通常会有点复杂。在 gfx-rs 中它需要一个管道(pipeline)，Vertex (顶点)，着色器(shaders)...
+好了！无论你使用什么，它只是简单画一个什么都没有的黑色屏幕。不幸的是，绘制其他东西通常会有点复杂。在 gfx-rs 中它需要一个管道(pipeline)，Vertex (顶点)，以及着色器(shaders)...
 
 ## gfx-rs 架构概述
 
-![AbstractSingletonProxyFactoryBean](https://i.imgur.com/Dgj7PX8.jpg){title ="一个典型的程序员经验。幸运的是，Gfx-rs 不是这样的。"}
+![AbstractSingletonProxyFactoryBean](https://i.imgur.com/Dgj7PX8.jpg){title="一个典型的程序员经验。幸运的是，Gfx-rs 不是这样的。"}
 
-Gfx-rs 是一个抽象库，基于四个底层图形 API 库：OpenGL（原始和 ES），DirectX，Metal 和 Vulkan。
-
-因此，它无法提供直接的 API 。尽管它本就不应该，因为图形 API（特别是像 OpenGL 这样的旧版本）非常冗长，命令式和有状态。它们既不安全也不易于使用。
+Gfx-rs 是一个抽象库，基于四个底层图形 API 库：OpenGL（原始和 ES），DirectX，Metal 和 Vulkan。因底层库多，它无法提供直接的 API 。不过它本就不应该(直接)，因为图形 API（特别是像 OpenGL 这样的旧版本）非常冗长，既命令式又有状态。它们既不安全也不易于使用。
 
 在 gfx-rs 中，一切都围绕三种核心类型构建：
 `Factory`和`Encoder`，还有`Device`。第一个用于创建东西，第二个是缓冲区，存储着由`Device`执行的图形命令，和`Device`将命令转换为底层 API 调用。
 
-此外，与 OpenGL 不同，但像 DX12 和 Vulcan 之类的当前-获取 API，其管道状态，会在管道状态对象（PSO）中封装。您可以拥有大量 PSO ，并在它们之间切换。但是要创建 PSO，首先必须定义管道，并指定 vertex 属性和形式。
+此外，与 OpenGL 不同，但像 DX12 和 Vulcan 之类的当前-获取 API，其管道状态，会在管道状态对象（PSO）中封装。您可以拥有大量 PSO ，并在它们之间切换。但是要创建 PSO，首先必须定义管道，并指定 vertex 属性和制服(uniforms)。
 
-Gfx-rs 博客中有个很棒的[博文](https://gfx-rs.github.io/2016/09/14/programming-model.html)，更详细地描述了 Gfx-rs 架构。
+> 译者：比喻为‘制服’，实际就是一致性条件常量
+
+Gfx-rs 博客中有个很棒的[博文](https://gfx-rs.github.io/2016/09/14/programming-model.html)，对 Gfx-rs 架构有更详细描述。
 
 ## 画一个正方形
 
-我们需要一个管道来在屏幕上绘制任何东西。
+我们需要一个管道，在屏幕上绘制任何东西。
 
 ```rust
 gfx_defines! {
@@ -117,11 +117,9 @@ gfx_defines! {
 }
 ```
 
-在图形编程中，一切都由三角形组成，三角形由 Vertex 定义。
+在图形编程中，一切都由三角形组成，三角形由 Vertex(顶点) 定义。Vertex 可以在坐标旁边，携带附加信息，我们只有 2D 位置`a_Pos`和颜色`a_Color`。该管道只有 Vertex 缓冲区和渲染目标，没有纹理，没有变换，没什么花哨的。
 
-Vertex 可以在坐标旁边，携带附加信息，我们只有 2D 位置`a_Pos`和颜色`a_Color`。该管道只有 Vertex 缓冲区和渲染目标，没有纹理，没有变换，没什么花哨的。
-
-GPU 不知道*究竟*要与 Vertex 做什么，和像素应具有什么颜色。要定义*着色器*使用的行为。有两种着色器：Vertex 着色器和片段着色器（让我们忽略我们不使用的几何着色器）。两者都在 GPU 上并行执行。Vertex 着色器在每个 Vertex 上运行，并以某种方式转换它。片段着色器在每个片段（通常是像素）上运行，并确定片段将具有的颜色。
+GPU 不知道*究竟*要与 Vertex 做什么，或是像素应具有什么颜色。而这些，要去定义*着色器*使用的行为。着色器有两种：Vertex 着色器和片段着色器（让我们忽略我们不使用的几何着色器）。两者都在 GPU 上并行执行。Vertex 着色器在每个 Vertex 上运行，并以某种方式转换它。片段着色器在每个片段（通常是像素）上运行，并确定片段将具有的颜色。
 
 我们的 Vertex 着色器非常非常简单：
 
@@ -139,7 +137,7 @@ void main() {
 }
 ```
 
-OpenGL 使用`(x, y, z, w)` [齐次坐标](http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/)和 RGBA 颜色。着色器只是将`a_Pos`和`a_Color`转换成 OpenGL 的位置和颜色。
+OpenGL 使用到`(x, y, z, w)` [齐次坐标](http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/)和 RGBA 颜色。着色器只是将`a_Pos`和`a_Color`转换成 OpenGL 的位置和颜色。
 
 片段着色器更简单：
 
@@ -195,11 +193,11 @@ encoder.flush(&mut device);
 
 程序运行了。
 
-![](https://i.imgur.com/7u3ol88.png){width = 600px height = 600px}
+![](https://i.imgur.com/7u3ol88.png){width=600px height=600px}
 
-这不是一个正方形。它不是正方形的原因很简单：它是三个 Vertex，所以它必须是一个三角形。另外 OpenGL 对方块一无所知，只能绘制三角形。
+这不是一个正方形。它不是正方形的原因很简单：它只有三个 Vertex，所以它必然是一个三角形。另外 OpenGL 对方块其实是一无所知，只能绘制三角形。
 
-您可以添加另外三个 Vertex，通过两个三角形绘制正方形。像这样：
+但您可以添加另外三个 Vertex，通过两个三角形绘制正方形。像这样：
 
 ```rust
 const SQUARE: [Vertex; 6] = [
@@ -212,7 +210,7 @@ const SQUARE: [Vertex; 6] = [
 ];
 ```
 
-但相反，元素缓冲区对象只能定义 4 个 Vertex，才能重用它们。
+但相反的，元素缓冲对象只能定义 4 个 Vertex，才能重用它们。
 
 ![](http://www.opengl-tutorial.org/assets/images/tuto-9-vbo-indexing/indexing1.png)
 
@@ -238,15 +236,15 @@ let (vertex_buffer, slice) =
 
 编译程序并运行。
 
-![](https://i.imgur.com/5JfHmm6.png){width = 600px height = 600px}
+![](https://i.imgur.com/5JfHmm6.png){width=600px height=600px}
 
-最后，一个正方形。最基本的事情已经完成，现在我们可以做得更远。
+最后，一个正方形。最基本的事情已经完成，现在我们可以做得更多。
 
-## 走得更远
+## 走下去
 
-你应该注意的第一件事是，我们画的正方形实际上是一个矩形：当你调整窗口的比例时，它会改变。这是因为 OpenGL 使用*标准化*坐标，所以 X 和 Y 都会在 -1 到 1 之间。所以我们需要调整正方形的 Vertex 和窗口的比例。
+你应该注意的第一件事是，我们画的正方形实际上是一个矩形：当你调整窗口的比例时，它会改变。这是因为 OpenGL 使用*标准化*坐标，所以 X 和 Y 都会在 -1 到 1 之间(遵循比例)。所以我们需要调整正方形的 Vertex 和窗口的比例。
 
-第二件事是：我们的 Vertex 和索引是预先定义的，并且是常量。我们无法调整它们，也无法快速制作新的正方形。
+第二件事是：我们的 Vertex 和索引是预先定义的，并且是常量。因此我们无法调整它们，也无法快速制作新的正方形。
 
 让我们解决这两个问题。定义一个 顶点(Vertex)生成器：
 
@@ -400,7 +398,7 @@ impl Pseudocube {
                 },
 ```
 
-它还活着。**它还活着！**是的，当你增加一点交互性的时候，事情总是变得更酷。
+它活了。**它活了！**是的，当你增加一点交互性的时候，事情总是变得更酷。
 
 让我们扩大方块：
 
@@ -444,9 +442,9 @@ impl Pseudocube {
 
 方格被扩大：
 
-![](https://i.imgur.com/rumV7tU.png){width=600px height=600px title="This is not a modern art."}
+![](https://i.imgur.com/rumV7tU.png){width=600px height=600px title="这不是一个现代艺术."}
 
-## 纹理和形态
+## 纹理和制服
 
 所以，你可以画正方形，移动光标，你还需要什么？哦，我明白了。图形。纯色很无聊，对吧？我们加一些[纹理](https://learnopengl.com/#!Getting-started/Textures)吧：
 
@@ -470,11 +468,11 @@ gfx_defines! {
 
 第二个变化是介绍管道中的`t_Awesome`纹理。而这会让，此管道绘制的所有三角形的纹理都相同。但是如果你想让不同的正方形看起来不同怎么办？嗯，有三种方法。第一种方法是为每个方块切换纹理。这种方法很慢，因为它要求每个方块都有一个绘制调用，而不能用一个调用绘制所有内容。第二种方法是把所有的东西都放在一个大的纹理（纹理地图集）中，并使用 UV 坐标从地图集中获取纹理。第三种方法是使用纹理数组（如果支持的话）。
 
-我们将使用这两种方法，因此我们的方块将具有相同的简单纹理：
+我们将使用第 2 种方法，所以我们的方块将具有相同的简单纹理：
 
 ![](https://i.imgur.com/40VzkBZ.jpg){title=":awesome:"}
 
-所以让我们来纹理化我们的方块。为此，我们需要一个箱子来加载图像：
+所以，让我们来纹理化我们的方块。为此，我们需要一个箱子来加载图像：
 
 ```toml
 [dependencies]
@@ -555,11 +553,11 @@ Vertex { pos: [pos.0 + hx, pos.1 + hy], uv: [1.0, 1.0], color: sq.color },
     };
 ```
 
-Ta da：
+哒嗒：
 
 ![](https://i.imgur.com/jeKLvoc.png){width=600px height=600px}
 
-哦，不。黑色仍然是黑色的，图像是颠倒的。首先是图像本身的缺陷（这就是从互联网下载 jpeg 所得到的），但是为什么它是颠倒的呢？
+哦，不对啊。黑色仍然是黑色的，图像是颠倒的。首先，这是图像本身的缺陷（这就是从互联网下载 jpeg 所得到的），但是为什么它是颠倒的呢？
 
 嗯，原因很简单。图像坐标为 Y 轴是上到下，而在 OpenGL 中，Y 轴总是下到上。所以最明显的解决方法就是翻转图像。但有一个更简单的方法：我们可以翻转 UV 坐标。
 
@@ -574,7 +572,7 @@ Vertex { pos: [pos.0 + hx, pos.1 + hy], uv: [1.0, 0.0], color: sq.color },
 
 ![](https://i.imgur.com/8li9Csm.png){width=600px height=600px title="Really :awesome:"}
 
-真棒！但如果你更喜欢纯色呢？我们需要一个开关。我们需要一致性。
+真棒！但如果你更喜欢纯色呢？我们需要一个开关。我们需要**一致性**。
 
 一致性(uniform/制服)是着色器的全局常量。它们用于将各种信息传递到着色器：转换材料、鼠标位置或某种开关。在 gfx-rs 中，有两种创建统一的方法，第一种方法是在管道中声明一个值，如下所示：
 

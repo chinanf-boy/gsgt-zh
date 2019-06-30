@@ -4,4 +4,4 @@ opts=-t html5 -f markdown_github+$extensions -H magic.head -s -c pandoc.css --ma
 rule pd
   command = pandoc $in -o $out $opts
 
-build index.html: pd gsgt.md | magic.head
+build index.html: pd gsgt.zh.md | magic.head

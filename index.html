@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Graphics by Squares: a Gfx-rs Tutorial</title>
+  <title>正方形的图形：Gfx-rs 教程</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -90,18 +90,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Graphics by Squares: a Gfx-rs Tutorial</h1>
+<h1 class="title">正方形的图形：Gfx-rs 教程</h1>
 </header>
-<p>I'm making a little toy to understand gfx-rs better. But as a side product, I also write this little tutorial to help other people to learn gfx-rs too.</p>
-<h2>Getting started</h2>
-<p>Let's write something that compiles and runs.</p>
+<p>我正在制作一个小玩具，来更好地理解 gfx-rs。但作为玩具的附属品，我也写了这个能帮助其他人学习 gfx-rs 的小教程。</p>
+<h2>入门</h2>
+<p>让我们写一些用来编译和运行的东西。</p>
 <pre><code>$ cargo init sqtoy</code></pre>
-<p>Add this to <code>Cargo.toml</code>:</p>
+<p>将下面代码添加到<code>Cargo.toml</code>：</p>
 <pre class="toml"><code>[dependencies]
 gfx = &quot;0.16&quot;
 gfx_window_glutin = &quot;0.16&quot;
 glutin = &quot;0.8&quot;</code></pre>
-<p>And put this into <code>main.rs</code>:</p>
+<p>把它放进去<code>main.rs</code>：</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb3-1" title="1"><span class="at">#[</span>macro_use<span class="at">]</span> <span class="kw">extern</span> <span class="kw">crate</span> gfx;</a>
 <a class="sourceLine" id="cb3-2" title="2"></a>
 <a class="sourceLine" id="cb3-3" title="3"><span class="kw">extern</span> <span class="kw">crate</span> gfx_window_glutin;</a>
@@ -147,29 +147,32 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb3-43" title="43">        device.cleanup();</a>
 <a class="sourceLine" id="cb3-44" title="44">    <span class="op">}</span></a>
 <a class="sourceLine" id="cb3-45" title="45"><span class="op">}</span></a></code></pre></div>
-<p>As you can see, we use gfx with glutin and OpenGL. Shortly what the code does:</p>
+<p>如您所见，我们会使用 gfx，并配上 glutin 和 OpenGL。简言之，代码的作用如下：</p>
 <ol>
-<li>Creates an event loop and prepares to create a window with title “Square Toy”</li>
-<li>Runs <code>gfx_window_glutin::init()</code> to get <code>glutin::Window</code>, <code>gfx_device_gl::Device</code> and a bunch or other things</li>
-<li>Uses the <code>factory</code> to create an <code>Encoder</code> that allows you to avoid calling raw OpenGL procedures.</li>
-<li>Each frame:
+<li>创建一个事件循环，并准备创建一个标题为“Square Toy”的窗口</li>
+<li>运行<code>gfx_window_glutin::init()</code>得到<code>glutin::Window</code>，<code>gfx_device_gl::Device</code>和一堆或其他的东西</li>
+<li>使用<code>factory</code>创建一个<code>Encoder</code>，这允许您避免调用原始 OpenGL 过程。</li>
+<li><p>每一帧：</p>
 <ol>
-<li>Check whether it's the time to exit</li>
-<li>Fill the screen with the color you want (it's <code>BLACK</code>)</li>
-<li>Actually do it.</li>
-<li>Since our buffering is at least double, switch buffers</li>
-<li>Cleanup</li>
+<li>检查是否为退出的时间</li>
+<li>用你想要的颜色填充屏幕（它是<code>BLACK</code>黑）</li>
+<li>实际做的。</li>
+<li>由于我们的缓冲至少是两倍，因此可以切换缓冲区</li>
+<li>清理</li>
 </ol></li>
 </ol>
-<p>Great! Whatever you use, it is always simple to draw a black screen full of nothing. Unfortunately, drawing something else is usually a little bit more complicated. In gfx-rs it requires a pipeline, vertices, shaders...</p>
-<h2>Overview of gfx-rs architecture</h2>
-<p><img src="https://i.imgur.com/Dgj7PX8.jpg" alt="AbstractSingletonProxyFactoryBean" title="A typical programmer experience. Fortunately, Gfx-rs is not like that." /></p>
-<p>Gfx-rs is a library that abstracts over four low-level graphics APIs: OpenGL (ordinary and ES), DirectX, Metal and Vulkan. Because of that, it cannot provide a direct API to do things. Neither it should though, as graphics APIs (especially older one like OpenGL) are extremely verbose, imperative and stateful. Also they are neither safe nor easy to use.</p>
-<p>In gfx-rs, everything is built around three core types: <code>Factory</code>, <code>Encoder</code> and <code>Device</code>. The first is used to create things, the second is a buffer that stores graphics commands to be executed by the <code>Device</code>, and the <code>Device</code> translates commands into low-level API calls.</p>
-<p>Also, like current-get API like DX12 and Vulcan but unlike OpenGL, the pipeline state is incapsulated in pipeline state objects (PSO). You can have a lot of PSOs and switch between them. But to create a PSO, first you have to define a pipeline and specify vertex atributes and uniforms.</p>
-<p>There's a <a href="https://gfx-rs.github.io/2016/09/14/programming-model.html">great post</a> in Gfx-rs blog describing Gfx-rs architecture in much more detail.</p>
-<h2>Drawing a square</h2>
-<p>We need a pipeline to draw anything on the screen.</p>
+<p>好了！无论你使用什么，它只是简单画一个什么都没有的黑色屏幕。不幸的是，绘制其他东西通常会有点复杂。在 gfx-rs 中它需要一个管道(pipeline)，Vertex (顶点)，以及着色器(shaders)...</p>
+<h2>gfx-rs 架构概述</h2>
+<p><img src="https://i.imgur.com/Dgj7PX8.jpg" alt="AbstractSingletonProxyFactoryBean" title="一个典型的程序员经验。幸运的是，Gfx-rs 不是这样的。" /></p>
+<p>Gfx-rs 是一个抽象库，基于四个底层图形 API 库：OpenGL（原始和 ES），DirectX，Metal 和 Vulkan。因底层库多，它无法提供直接的 API 。不过它本就不应该(直接)，因为图形 API（特别是像 OpenGL 这样的旧版本）非常冗长，既命令式又有状态。它们既不安全也不易于使用。</p>
+<p>在 gfx-rs 中，一切都围绕三种核心类型构建： <code>Factory</code>和<code>Encoder</code>，还有<code>Device</code>。第一个用于创建东西，第二个是缓冲区，存储着由<code>Device</code>执行的图形命令，和<code>Device</code>将命令转换为底层 API 调用。</p>
+<p>此外，与 OpenGL 不同，但像 DX12 和 Vulcan 之类的当前-获取 API，其管道状态，会在管道状态对象（PSO）中封装。您可以拥有大量 PSO ，并在它们之间切换。但是要创建 PSO，首先必须定义管道，并指定 vertex 属性和制服(uniforms)。</p>
+<blockquote>
+<p>译者：比喻为‘制服’，实际就是一致性条件常量</p>
+</blockquote>
+<p>Gfx-rs 博客中有个很棒的<a href="https://gfx-rs.github.io/2016/09/14/programming-model.html">博文</a>，对 Gfx-rs 架构有更详细描述。</p>
+<h2>画一个正方形</h2>
+<p>我们需要一个管道，在屏幕上绘制任何东西。</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb4-1" title="1"><span class="pp">gfx_defines!</span> <span class="op">{</span></a>
 <a class="sourceLine" id="cb4-2" title="2">    vertex Vertex <span class="op">{</span></a>
 <a class="sourceLine" id="cb4-3" title="3">        pos: <span class="op">[</span><span class="dt">f32</span>; <span class="dv">2</span><span class="op">]</span> = <span class="st">&quot;a_Pos&quot;</span>,</a>
@@ -181,9 +184,9 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb4-9" title="9">        out: <span class="pp">gfx::</span>RenderTarget&lt;ColorFormat&gt; = <span class="st">&quot;Target0&quot;</span>,</a>
 <a class="sourceLine" id="cb4-10" title="10">    <span class="op">}</span></a>
 <a class="sourceLine" id="cb4-11" title="11"><span class="op">}</span></a></code></pre></div>
-<p>In graphics programming, everything is made of triangles and triangles are defined by their vertices. Vertices can carry additional information beside the coordinates, ours have only 2D position <code>a_Pos</code> and color <code>a_Color</code>. The pipeline has only the vertex buffer and the render target, no textures, no transformations, nothing fancy.</p>
-<p>The GPU doesn't know what <em>exactly</em> to do with the vertices and what color pixels should have. To define the behaviour <em>shaders</em> are used. There're two kinds of shaders vextex shaders and fragment shaders (let's ignore geometric shaders we don't use). Both are executed in parallel on the GPU. A vertex shader runs on each vertex and transfroms it in a some way. A fragment shader runs on each fragment (usually pixel) and determinates what the color the fragment will have.</p>
-<p>Our vertex shader is very, very simple:</p>
+<p>在图形编程中，一切都由三角形组成，三角形由 Vertex(顶点) 定义。Vertex 可以在坐标旁边，携带附加信息，我们只有 2D 位置<code>a_Pos</code>和颜色<code>a_Color</code>。该管道只有 Vertex 缓冲区和渲染目标，没有纹理，没有变换，没什么花哨的。</p>
+<p>GPU 不知道<em>究竟</em>要与 Vertex 做什么，或是像素应具有什么颜色。而这些，要去定义<em>着色器</em>使用的行为。着色器有两种：Vertex 着色器和片段着色器（让我们忽略我们不使用的几何着色器）。两者都在 GPU 上并行执行。Vertex 着色器在每个 Vertex 上运行，并以某种方式转换它。片段着色器在每个片段（通常是像素）上运行，并确定片段将具有的颜色。</p>
+<p>我们的 Vertex 着色器非常非常简单：</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode glsl"><code class="sourceCode glsl"><a class="sourceLine" id="cb5-1" title="1"><span class="co">// shaders/rect_150.glslv</span></a>
 <a class="sourceLine" id="cb5-2" title="2"><span class="pp">#version 150 core</span></a>
 <a class="sourceLine" id="cb5-3" title="3"></a>
@@ -195,8 +198,8 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb5-9" title="9">    v_Color = <span class="dt">vec4</span>(a_Color, <span class="fl">1.0</span>);</a>
 <a class="sourceLine" id="cb5-10" title="10">    <span class="bu">gl_Position</span> = <span class="dt">vec4</span>(a_Pos, <span class="fl">0.0</span>, <span class="fl">1.0</span>);</a>
 <a class="sourceLine" id="cb5-11" title="11">}</a></code></pre></div>
-<p>OpenGL uses <code>(x, y, z, w)</code> <a href="http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/">homogeneous coordinates</a> and RGBA colors. The shader just translates <code>a_Pos</code> and <code>a_Color</code> into OpenGL position and color.</p>
-<p>The fragment shader is even more simple:</p>
+<p>OpenGL 使用到<code>(x, y, z, w)</code> <a href="http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/">齐次坐标</a>和 RGBA 颜色。着色器只是将<code>a_Pos</code>和<code>a_Color</code>转换成 OpenGL 的位置和颜色。</p>
+<p>片段着色器更简单：</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode glsl"><code class="sourceCode glsl"><a class="sourceLine" id="cb6-1" title="1"><span class="co">// shaders/rect_150.glslf</span></a>
 <a class="sourceLine" id="cb6-2" title="2"><span class="pp">#version 150 core</span></a>
 <a class="sourceLine" id="cb6-3" title="3"></a>
@@ -206,8 +209,8 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb6-7" title="7"><span class="dt">void</span> <span class="fu">main</span>() {</a>
 <a class="sourceLine" id="cb6-8" title="8">    Target0 = v_Color;</a>
 <a class="sourceLine" id="cb6-9" title="9">}</a></code></pre></div>
-<p>It just sets the pixel color to <code>v_Color</code> value <a href="http://www.geeks3d.com/20130514/opengl-interpolation-qualifiers-glsl-tutorial/">interpolated</a> from vertices <code>v_Color</code> values by the GPU.</p>
-<p>Let's define our vertices:</p>
+<p>它只是将像素颜色设置为<code>v_Color</code>值，它通过 GPU， 由 Vertex <code>v_Color</code>值<a href="http://www.geeks3d.com/20130514/opengl-interpolation-qualifiers-glsl-tutorial/">插入</a>。</p>
+<p>让我们定义我们的 Vertex ：</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">const</span> WHITE: <span class="op">[</span><span class="dt">f32</span>; <span class="dv">3</span><span class="op">]</span> = <span class="op">[</span><span class="dv">1.0</span>, <span class="dv">1.0</span>, <span class="dv">1.0</span><span class="op">]</span>;</a>
 <a class="sourceLine" id="cb7-2" title="2"></a>
 <a class="sourceLine" id="cb7-3" title="3"><span class="kw">const</span> SQUARE: <span class="op">[</span>Vertex; <span class="dv">3</span><span class="op">]</span> = <span class="op">[</span></a>
@@ -215,7 +218,7 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb7-5" title="5">    Vertex <span class="op">{</span> pos: <span class="op">[</span>-<span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb7-6" title="6">    Vertex <span class="op">{</span> pos: <span class="op">[</span>-<span class="dv">0.5</span>, <span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span></a>
 <a class="sourceLine" id="cb7-7" title="7"><span class="op">]</span>;</a></code></pre></div>
-<p>And initalize everything we need for drawing:</p>
+<p>并初始化我们绘制所需的一切：</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">let</span> <span class="kw">mut</span> encoder: <span class="pp">gfx::</span>Encoder&lt;_, _&gt; = factory.create_command_buffer().into();</a>
 <a class="sourceLine" id="cb8-2" title="2"><span class="kw">let</span> pso = factory.create_pipeline_simple(</a>
 <a class="sourceLine" id="cb8-3" title="3">    <span class="pp">include_bytes!</span>(<span class="pp">concat!</span>(<span class="pp">env!</span>(<span class="st">&quot;CARGO_MANIFEST_DIR&quot;</span>), <span class="st">&quot;/shaders/rect_150.glslv&quot;</span>)),</a>
@@ -227,14 +230,14 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb8-9" title="9">    vbuf: vertex_buffer,</a>
 <a class="sourceLine" id="cb8-10" title="10">    out: main_color</a>
 <a class="sourceLine" id="cb8-11" title="11"><span class="op">}</span>;</a></code></pre></div>
-<p>Since <code>main_color</code> is moved into <code>data</code>, we need to replace <code>&amp;main_color</code> with <code>&amp;data.out</code> everywhere. And then, in the event loop, we draw:</p>
+<p>因<code>main_color</code>(所有权)移动到<code>data</code>，我们需要将其他地方的<code>&amp;main_color</code>换成<code>&amp;data.out</code>。然后，在事件循环中，我们绘制：</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb9-1" title="1">encoder.clear(&amp;data.out, BLACK);</a>
 <a class="sourceLine" id="cb9-2" title="2">encoder.draw(&amp;slice, &amp;pso, &amp;data);</a>
 <a class="sourceLine" id="cb9-3" title="3">encoder.flush(&amp;<span class="kw">mut</span> device);</a></code></pre></div>
-<p>And the program was run.</p>
+<p>程序运行了。</p>
 <p><img src="https://i.imgur.com/7u3ol88.png" width="600" height="600" /></p>
-<p>This is not a square. The reason why it is not a square is simple: it has three vertices, so it must be a triange. Also OpenGL doesn't know anything about squares, it can only draw triangles.</p>
-<p>You could just add three more vertices to draw a square by two triangles. Like this:</p>
+<p>这不是一个正方形。它不是正方形的原因很简单：它只有三个 Vertex，所以它必然是一个三角形。另外 OpenGL 对方块其实是一无所知，只能绘制三角形。</p>
+<p>但您可以添加另外三个 Vertex，通过两个三角形绘制正方形。像这样：</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">const</span> SQUARE: <span class="op">[</span>Vertex; <span class="dv">6</span><span class="op">]</span> = <span class="op">[</span></a>
 <a class="sourceLine" id="cb10-2" title="2">    Vertex <span class="op">{</span> pos: <span class="op">[</span><span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb10-3" title="3">    Vertex <span class="op">{</span> pos: <span class="op">[</span>-<span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
@@ -243,9 +246,9 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb10-6" title="6">    Vertex <span class="op">{</span> pos: <span class="op">[</span><span class="dv">0.5</span>, <span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb10-7" title="7">    Vertex <span class="op">{</span> pos: <span class="op">[</span><span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb10-8" title="8"><span class="op">]</span>;</a></code></pre></div>
-<p>But instead we can define just 4 vertices and reuse them with Element Buffer Objects.</p>
+<p>但相反的，元素缓冲对象只能定义 4 个 Vertex，才能重用它们。</p>
 <p><img src="http://www.opengl-tutorial.org/assets/images/tuto-9-vbo-indexing/indexing1.png" /></p>
-<p>So let's define vertices and indices:</p>
+<p>所以，让我们定义 Vertex 和索引：</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">const</span> SQUARE: &amp;<span class="op">[</span>Vertex<span class="op">]</span> = &amp;<span class="op">[</span></a>
 <a class="sourceLine" id="cb11-2" title="2">    Vertex <span class="op">{</span> pos: <span class="op">[</span><span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb11-3" title="3">    Vertex <span class="op">{</span> pos: <span class="op">[</span>-<span class="dv">0.5</span>, -<span class="dv">0.5</span><span class="op">]</span>, color: WHITE <span class="op">}</span>,</a>
@@ -254,16 +257,16 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb11-6" title="6"><span class="op">]</span>;</a>
 <a class="sourceLine" id="cb11-7" title="7"></a>
 <a class="sourceLine" id="cb11-8" title="8"><span class="kw">const</span> INDICES: &amp;<span class="op">[</span><span class="dt">u16</span><span class="op">]</span> = &amp;<span class="op">[</span><span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">0</span><span class="op">]</span>;</a></code></pre></div>
-<p>And use them:</p>
+<p>并使用它们：</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">let</span> (vertex_buffer, slice) =</a>
 <a class="sourceLine" id="cb12-2" title="2">    factory.create_vertex_buffer_with_slice(SQUARE, INDICES);</a></code></pre></div>
-<p>Compile the program and run.</p>
+<p>编译程序并运行。</p>
 <p><img src="https://i.imgur.com/5JfHmm6.png" width="600" height="600" /></p>
-<p>Finally, a square. The most basic thing is done, now we can do further.</p>
-<h2>Going deeper</h2>
-<p>The first thing you should notice is that the square we drew is actually a rectangle: when you resize the window proportions change. That's because OpenGL uses <em>normalized</em> coordinates where both x and y are from –1 to 1. So we need to adjust the square vertices to the window ratio.</p>
-<p>The second thing is: our vertices and indices are pre-defined and constant. We can't adjust them, we can't make new squares on the fly.</p>
-<p>Let's fix both of these issues. Define a vertice generator:</p>
+<p>最后，一个正方形。最基本的事情已经完成，现在我们可以做得更多。</p>
+<h2>走下去</h2>
+<p>你应该注意的第一件事是，我们画的正方形实际上是一个矩形：当你调整窗口的比例时，它会改变。这是因为 OpenGL 使用<em>标准化</em>坐标，所以 X 和 Y 都会在 -1 到 1 之间(遵循比例)。所以我们需要调整正方形的 Vertex 和窗口的比例。</p>
+<p>第二件事是：我们的 Vertex 和索引是预先定义的，并且是常量。因此我们无法调整它们，也无法快速制作新的正方形。</p>
+<p>让我们解决这两个问题。定义一个 顶点(Vertex)生成器：</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb13-1" title="1"><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">,</span> <span class="bu">Clone</span><span class="at">,</span> <span class="bu">Copy</span><span class="at">)]</span></a>
 <a class="sourceLine" id="cb13-2" title="2"><span class="kw">struct</span> Square <span class="op">{</span></a>
 <a class="sourceLine" id="cb13-3" title="3">    <span class="kw">pub</span> pos: (<span class="dt">f32</span>, <span class="dt">f32</span>),</a>
@@ -271,8 +274,8 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb13-5" title="5">    <span class="kw">pub</span> color: <span class="op">[</span><span class="dt">f32</span>; <span class="dv">3</span><span class="op">]</span></a>
 <a class="sourceLine" id="cb13-6" title="6"><span class="op">}</span></a>
 <a class="sourceLine" id="cb13-7" title="7"></a>
-<a class="sourceLine" id="cb13-8" title="8"><span class="co">// A cube is a pile of infinitely (as continuum) many squares</span></a>
-<a class="sourceLine" id="cb13-9" title="9"><span class="co">// This data stucture is finite, so we call it “pseudo”</span></a>
+<a class="sourceLine" id="cb13-8" title="8"><span class="co">//立方体(cube)是一堆（连续）无限多的正方形</span></a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="co">//这个数据结构是有限的，所以我们加个“伪（pseudo）”</span></a>
 <a class="sourceLine" id="cb13-10" title="10"><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">)]</span></a>
 <a class="sourceLine" id="cb13-11" title="11"><span class="kw">struct</span> Pseudocube <span class="op">{</span></a>
 <a class="sourceLine" id="cb13-12" title="12">    squares: <span class="dt">Vec</span>&lt;Square&gt;,</a>
@@ -329,7 +332,7 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb13-63" title="63">        <span class="kw">self</span>.ratio = ratio</a>
 <a class="sourceLine" id="cb13-64" title="64">    <span class="op">}</span></a>
 <a class="sourceLine" id="cb13-65" title="65"><span class="op">}</span></a></code></pre></div>
-<p>And use it:</p>
+<p>使用它：</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">pub</span> <span class="kw">fn</span> main() <span class="op">{</span></a>
 <a class="sourceLine" id="cb14-2" title="2">    <span class="kw">let</span> <span class="kw">mut</span> cube = <span class="pp">Pseudocube::</span>new();</a>
 <a class="sourceLine" id="cb14-3" title="3">    cube.add_square(<span class="dv">0.0</span>, <span class="dv">0.0</span>, <span class="dv">1.0</span>, WHITE);</a>
@@ -359,7 +362,7 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb14-27" title="27">        <span class="co">// ...</span></a>
 <a class="sourceLine" id="cb14-28" title="28">    <span class="op">}</span></a>
 <a class="sourceLine" id="cb14-29" title="29"><span class="op">}</span></a></code></pre></div>
-<p>Great. Now our squares are always squares. Time to add some cursor:</p>
+<p>真棒。现在我们的正方形总是正方形。是时候添加一些光标：</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb15-1" title="1"><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="at">,</span> <span class="bu">Clone</span><span class="at">,</span> <span class="bu">Copy</span><span class="at">)]</span></a>
 <a class="sourceLine" id="cb15-2" title="2"><span class="kw">enum</span> Cursor <span class="op">{</span></a>
 <a class="sourceLine" id="cb15-3" title="3">    Plain((<span class="dt">f32</span>, <span class="dt">f32</span>), <span class="op">[</span><span class="dt">f32</span>; <span class="dv">3</span><span class="op">]</span>),</a>
@@ -403,8 +406,8 @@ glutin = &quot;0.8&quot;</code></pre>
 <a class="sourceLine" id="cb15-41" title="41">                    );</a>
 <a class="sourceLine" id="cb15-42" title="42">                    needs_update = <span class="cn">true</span></a>
 <a class="sourceLine" id="cb15-43" title="43">                <span class="op">}</span>,</a></code></pre></div>
-<p>It's alive. <strong>IT'S ALIVE!</strong> Yeah, things always becomes more cool when you add a little bit of interactivity.</p>
-<p>Let's grow squares:</p>
+<p>它活了。<strong>它活了！</strong>是的，当你增加一点交互性的时候，事情总是变得更酷。</p>
+<p>让我们扩大方块：</p>
 <pre class="toml"><code>[dependencies]
 rand = &quot;*&quot;</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">impl</span> Pseudocube <span class="op">{</span></a>
@@ -437,10 +440,10 @@ rand = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb17-28" title="28">            <span class="op">}</span></a>
 <a class="sourceLine" id="cb17-29" title="29"></a>
 <a class="sourceLine" id="cb17-30" title="30">            cube.tick();</a></code></pre></div>
-<p>And squares were grown:</p>
-<p><img src="https://i.imgur.com/rumV7tU.png" title="This is not a modern art." width="600" height="600" /></p>
-<h2>Textures and uniforms</h2>
-<p>So, you can draw squares, you can move cursor around, what else do you need? Oh, I see. Graphics. Plain colors are boring, right? Let's add some <a href="https://learnopengl.com/#!Getting-started/Textures">texturing</a>:</p>
+<p>方格被扩大：</p>
+<p><img src="https://i.imgur.com/rumV7tU.png" title="这不是一个现代艺术." width="600" height="600" /></p>
+<h2>纹理和制服</h2>
+<p>所以，你可以画正方形，移动光标，你还需要什么？哦，我明白了。图形。纯色很无聊，对吧？我们加一些<a href="https://learnopengl.com/#!Getting-started/Textures">纹理</a>吧：</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb18-1" title="1"><span class="pp">gfx_defines!</span> <span class="op">{</span></a>
 <a class="sourceLine" id="cb18-2" title="2">    vertex Vertex <span class="op">{</span></a>
 <a class="sourceLine" id="cb18-3" title="3">        pos: <span class="op">[</span><span class="dt">f32</span>; <span class="dv">2</span><span class="op">]</span> = <span class="st">&quot;a_Pos&quot;</span>,</a>
@@ -454,14 +457,14 @@ rand = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb18-11" title="11">        out: <span class="pp">gfx::</span>RenderTarget&lt;ColorFormat&gt; = <span class="st">&quot;Target0&quot;</span>,</a>
 <a class="sourceLine" id="cb18-12" title="12">    <span class="op">}</span></a>
 <a class="sourceLine" id="cb18-13" title="13"><span class="op">}</span></a></code></pre></div>
-<p>There are two changes here. The first is: vertices have got a new data: <code>a_Uv</code>. And if you think this can mean only one thing, you're right: yes, GPU doesn't know how to <em>exactly</em> draw textures. And yes, we use a fragment shader to determinate the behavior. <code>a_Uv</code> are coordinates of a texture fragment.</p>
-<p>The second change introduces <code>t_Awesome</code> texture in the pipeline. The texture is the same for all triangles drawn with this pipeline. But what if you want different squares to look different? Well, there're three ways. The first way is to switch textures for each square. This ways is slow because it requires a draw call for each square, you can't draw everything with one call. The second way is to put everything into one big texture (a texture atlas) and use uv coordinates to get a texture from the atlas. The third way is to use a texture array (if it's supported).</p>
-<p>We'll use neither of these ways, so our squares will have the same simple texture:</p>
+<p>这里有两个变化。第一个是：Vertex 得到了一个新数据：<code>a_Uv</code>。如果你认为这只意味着一件事，你是对的：是的，GPU 不知道如何<em>确切地</em>绘制纹理。是的，我们使用片段着色器来确定行为。<code>a_Uv</code>是纹理片段的坐标。</p>
+<p>第二个变化是介绍管道中的<code>t_Awesome</code>纹理。而这会让，此管道绘制的所有三角形的纹理都相同。但是如果你想让不同的正方形看起来不同怎么办？嗯，有三种方法。第一种方法是为每个方块切换纹理。这种方法很慢，因为它要求每个方块都有一个绘制调用，而不能用一个调用绘制所有内容。第二种方法是把所有的东西都放在一个大的纹理（纹理地图集）中，并使用 UV 坐标从地图集中获取纹理。第三种方法是使用纹理数组（如果支持的话）。</p>
+<p>我们将使用第 2 种方法，所以我们的方块将具有相同的简单纹理：</p>
 <p><img src="https://i.imgur.com/40VzkBZ.jpg" title=":awesome:" /></p>
-<p>So let's texture our squares. To do it, we need a crate to load images:</p>
+<p>所以，让我们来纹理化我们的方块。为此，我们需要一个箱子来加载图像：</p>
 <pre class="toml"><code>[dependencies]
 image = &quot;*&quot;</code></pre>
-<p>And we need to modify our shaders a little bit:</p>
+<p>我们需要稍微修改一下我们的着色器：</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode glsl"><code class="sourceCode glsl"><a class="sourceLine" id="cb20-1" title="1"><span class="pp">#version 150 core</span></a>
 <a class="sourceLine" id="cb20-2" title="2"></a>
 <a class="sourceLine" id="cb20-3" title="3"><span class="dt">in</span> <span class="dt">vec2</span> a_Pos;</a>
@@ -492,7 +495,7 @@ image = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb21-15" title="15">        Target0 = <span class="dt">vec4</span>(aw, <span class="fl">1.0</span>);</a>
 <a class="sourceLine" id="cb21-16" title="16">    }</a>
 <a class="sourceLine" id="cb21-17" title="17">}</a></code></pre></div>
-<p>And copypaste a function from <a href="https://wiki.alopex.li/LearningGfx">an another tutorial</a>:</p>
+<p>复制粘贴<a href="https://wiki.alopex.li/LearningGfx">另一个教程</a>的函数：</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb22-1" title="1"><span class="kw">fn</span> load_texture&lt;F, R&gt;(factory: &amp;<span class="kw">mut</span> F, path: &amp;<span class="dt">str</span>) -&gt; <span class="pp">gfx::handle::</span>ShaderResourceView&lt;R, <span class="op">[</span><span class="dt">f32</span>; <span class="dv">4</span><span class="op">]</span>&gt;</a>
 <a class="sourceLine" id="cb22-2" title="2">    <span class="kw">where</span> F: <span class="pp">gfx::</span>Factory&lt;R&gt;, R: <span class="pp">gfx::</span>Resources</a>
 <a class="sourceLine" id="cb22-3" title="3"><span class="op">{</span></a>
@@ -502,12 +505,12 @@ image = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb22-7" title="7">    <span class="kw">let</span> (_, view) = factory.<span class="pp">create_texture_immutable_u8::</span>&lt;ColorFormat&gt;(kind, &amp;<span class="op">[</span>&amp;img<span class="op">]</span>).unwrap();</a>
 <a class="sourceLine" id="cb22-8" title="8">    view</a>
 <a class="sourceLine" id="cb22-9" title="9"><span class="op">}</span></a></code></pre></div>
-<p>Add uv coordinates to vertices:</p>
+<p>向 Vertex 添加 UV 坐标：</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb23-1" title="1">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> + hx, pos.<span class="dv">1</span> - hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">1.0</span>, <span class="dv">0.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb23-2" title="2">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> - hx, pos.<span class="dv">1</span> - hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">0.0</span>, <span class="dv">0.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb23-3" title="3">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> - hx, pos.<span class="dv">1</span> + hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">0.0</span>, <span class="dv">1.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb23-4" title="4">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> + hx, pos.<span class="dv">1</span> + hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">1.0</span>, <span class="dv">1.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a></code></pre></div>
-<p>And load the texture:</p>
+<p>加载纹理：</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb24-1" title="1">    <span class="kw">let</span> texture = load_texture(&amp;<span class="kw">mut</span> factory, <span class="st">&quot;assets/awesome.png&quot;</span>);</a>
 <a class="sourceLine" id="cb24-2" title="2">    <span class="kw">let</span> sampler = factory.create_sampler_linear();</a>
 <a class="sourceLine" id="cb24-3" title="3"></a>
@@ -516,26 +519,26 @@ image = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb24-6" title="6">        awesome: (texture, sampler),</a>
 <a class="sourceLine" id="cb24-7" title="7">        out: main_color</a>
 <a class="sourceLine" id="cb24-8" title="8">    <span class="op">}</span>;</a></code></pre></div>
-<p>Ta-da:</p>
+<p>哒嗒：</p>
 <p><img src="https://i.imgur.com/jeKLvoc.png" width="600" height="600" /></p>
-<p>Oh no. The black is still black and the image is upside down. Well, the first is the bug of the image itself (that's what you get for downloading JPEG from the Internet), but why it's upside down?</p>
-<p>Well, the reason is simple. Image coordinates have y-axis up-down, while in OpenGL y axis is always down-up. So the most obvious solution is to flip the image. But there's a more simple way: we can flip uv coordinates instead.</p>
+<p>哦，不对啊。黑色仍然是黑色的，图像是颠倒的。首先，这是图像本身的缺陷（这就是从互联网下载 jpeg 所得到的），但是为什么它是颠倒的呢？</p>
+<p>嗯，原因很简单。图像坐标为 Y 轴是上到下，而在 OpenGL 中，Y 轴总是下到上。所以最明显的解决方法就是翻转图像。但有一个更简单的方法：我们可以翻转 UV 坐标。</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb25-1" title="1">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> + hx, pos.<span class="dv">1</span> - hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">1.0</span>, <span class="dv">1.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb25-2" title="2">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> - hx, pos.<span class="dv">1</span> - hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">0.0</span>, <span class="dv">1.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb25-3" title="3">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> - hx, pos.<span class="dv">1</span> + hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">0.0</span>, <span class="dv">0.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a>
 <a class="sourceLine" id="cb25-4" title="4">Vertex <span class="op">{</span> pos: <span class="op">[</span>pos.<span class="dv">0</span> + hx, pos.<span class="dv">1</span> + hy<span class="op">]</span>, uv: <span class="op">[</span><span class="dv">1.0</span>, <span class="dv">0.0</span><span class="op">]</span>, color: sq.color <span class="op">}</span>,</a></code></pre></div>
-<p>And then...</p>
+<p>然后。。。</p>
 <p><img src="https://i.imgur.com/8li9Csm.png" title="Really :awesome:" width="600" height="600" /></p>
-<p>Great! But what if you actually like plain colors more? We need a switch. We need a uniform.</p>
-<p>Uniforms are global constants of shaders. They are used to pass various information into shaders: transformation matices, mouse position or some kind of switch. There're two ways to create a uniform in gfx-rs, the first is to just declare a single value in the pipeline like this:</p>
+<p>真棒！但如果你更喜欢纯色呢？我们需要一个开关。我们需要<strong>一致性</strong>。</p>
+<p>一致性(uniform/制服)是着色器的全局常量。它们用于将各种信息传递到着色器：转换材料、鼠标位置或某种开关。在 gfx-rs 中，有两种创建统一的方法，第一种方法是在管道中声明一个值，如下所示：</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb26-1" title="1">switch: <span class="pp">gfx::</span>Global&lt;<span class="dt">i32</span>&gt; = <span class="st">&quot;i_Switch&quot;</span>,</a></code></pre></div>
-<p>The second way is to define a group of constants like</p>
+<p>第二种方法是定义一组常量，比如</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb27-1" title="1">constant Globals <span class="op">{</span></a>
 <a class="sourceLine" id="cb27-2" title="2">    mx_vp: <span class="op">[[</span><span class="dt">f32</span>; <span class="dv">4</span><span class="op">]</span>; <span class="dv">4</span><span class="op">]</span> = <span class="st">&quot;u_ViewProj&quot;</span>,</a>
 <a class="sourceLine" id="cb27-3" title="3">    num_lights: <span class="dt">u32</span> = <span class="st">&quot;u_NumLights&quot;</span>,</a>
 <a class="sourceLine" id="cb27-4" title="4"><span class="op">}</span></a></code></pre></div>
-<p>and then create a constant buffer. We'll use the first way because it's the simplest one.</p>
-<p>So let's change the shader a little bit:</p>
+<p>然后，创建一个常量缓冲区。我们将使用第一种方法，因为它是最简单的方法。</p>
+<p>让我们稍微改变一下着色器：</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode glsl"><code class="sourceCode glsl"><a class="sourceLine" id="cb28-1" title="1">    <span class="kw">if</span>(i_Switch == <span class="dv">0</span>) {</a>
 <a class="sourceLine" id="cb28-2" title="2">        <span class="kw">if</span>(aw == <span class="dt">vec3</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>)) {</a>
 <a class="sourceLine" id="cb28-3" title="3">            Target0 = <span class="fl">0.20</span> * v_Color;</a>
@@ -545,7 +548,7 @@ image = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb28-7" title="7">    } <span class="kw">else</span> {</a>
 <a class="sourceLine" id="cb28-8" title="8">        Target0 = v_Color;</a>
 <a class="sourceLine" id="cb28-9" title="9">    }</a></code></pre></div>
-<p>And add some code:</p>
+<p>并添加一些代码：</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb29-1" title="1"><span class="kw">let</span> <span class="kw">mut</span> data = <span class="pp">pipe::</span>Data <span class="op">{</span></a>
 <a class="sourceLine" id="cb29-2" title="2">    vbuf: vertex_buffer,</a>
 <a class="sourceLine" id="cb29-3" title="3">    awesome: (texture, sampler),</a>
@@ -558,16 +561,16 @@ image = &quot;*&quot;</code></pre>
 <a class="sourceLine" id="cb30-4" title="4">        <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></a>
 <a class="sourceLine" id="cb30-5" title="5">            data.switch = <span class="dv">0</span></a>
 <a class="sourceLine" id="cb30-6" title="6">        <span class="op">}</span>,</a></code></pre></div>
-<p>And we are done.</p>
-<h2>Conclusion</h2>
-<p>Programming is the art of data transformation. Graphics programming is a great example of this statement: GPU does no magic by itself. You have to feed it with vertex data and define the transformations (shaders) so it could transform this data, in a simple and direct way, into another kind of data: array of pixels to be shown on the screen.</p>
-<p>Gfx-rs is a great library helping you with that. It provides a simple but clear and <em>rustic</em> way to interact with GPU. Even though the docs looks scary because of lack of enough documentation, the API itself is pretty straightforward and easy to use.</p>
-<p>There's too few articels about gfx-rs and almost no tutorials. I hope this litte tutorial will help other people to get into graphics programming on Rust and makes the learning less steep.</p>
-<h2>Resources</h2>
-<p>There're two great resouces about OpenGL: <a href="https://learnopengl.com/">Learn OpenGL</a> and <a href="http://opengl-tutorial.org/">opengl-tutorial</a>. They explain basic graphics programming principles in much detail, providing great examples and illustrations.</p>
-<p>I also strongly advice you the <a href="https://gitter.im/gfx-rs/gfx">gfx-rs gitter</a>. It is not only welcoming, but also very helpful, writing this tutorial would be much harder without their help.</p>
-<p><a href="https://thebookofshaders.com/">The Book of Shaders</a> is an awesome book about fragment sharder. It is not only about the art of shader programming, but also about shader as <em>the art</em>. Shaders are not only about graphics in AAA games, they are an artist's tool as well. This book with a lot of beatiful examples will introduce you into the world of <a href="https://github.com/terkelg/awesome-creative-coding">creative coding</a>.</p>
-<h2>Source code</h2>
-<p>The source code of sqtoy is available <a href="https://github.com/suhr/sqtoy">on Github</a>. And the source code of this tutorial is <a href="https://github.com/suhr/gsgt">available</a> on Github too. Pull requests are welcome, especially pull requests to the tutorial: I'm neither a good writer nor a good English speaker, so there's probably tons things to improve.</p>
+<p>好了完成。</p>
+<h2>结论</h2>
+<p>编程是数据转换的艺术。图形编程就是这样一个很好的例子：GPU 本身没有魔力。您必须向它提供 Vertex 数据，并定义转换器（着色器），以便它能够以简单直接的方式，将此数据转换为另一种数据：屏幕上显示的像素数组。</p>
+<p>gfx-rs 是一个很好的库，可以帮助您完成这个任务。它提供了一个简单但清晰的，与 GPU 交互的<em>rust 风格</em>方式。尽管由于缺乏足够的文档，文档看起来很吓人，但是 API 本身非常简单。且易于使用。</p>
+<p>关于 gfx-rs 的文章太少，几乎没有教程。我希望这个小小的教程。将帮助其他人进入 Rist 的图形编程，并使学习不那么陡峭。</p>
+<h2>资源</h2>
+<p>OpenGL 有两个很好的来源：<a href="https://learnopengl.com/">学习 OpenGL</a>和<a href="http://opengl-tutorial.org/">OpenGL 教程</a>. 它们详细地解释了基本的图形编程原理，提供了很好的示例和说明。</p>
+<p>我也强烈建议你<a href="https://gitter.im/gfx-rs/gfx">gfx gitter</a>. 这不仅是欢迎，而且是非常有帮助的，没有他们的帮助，写这个教程会更加困难。</p>
+<p><a href="https://thebookofshaders.com/">《阴影之书》/ 着色器之书</a>是一本关于片段着色器的好书。它不仅是关于着色编程的艺术，而且是关于可称之为艺术的着色程序。着色器不仅是 AAA 游戏中的图形，也是艺术家的工具。这本书有许多美丽的例子，会把你引入<a href="https://github.com/terkelg/awesome-creative-coding">创造性编码</a>世界。</p>
+<h2>源代码</h2>
+<p>sqtoy 的源代码可用<a href="https://github.com/suhr/sqtoy">在 Github 上</a>。 本教程文章的源代码也在 Github 上<a href="https://github.com/suhr/gsgt">可获得的</a>。拉取请求是受欢迎的，尤其是拉取请求到教程：我既不是一个好作家，也不是一个好的英语演说家，所以可能有很多事情需要改进。</p>
 </body>
 </html>
