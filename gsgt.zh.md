@@ -1,16 +1,16 @@
-# 标题：Squares 的图形：Gfx-rs 教程
+# 标题：正方形的图形：Gfx-rs 教程
 
-我正在制作一个小玩具来更好地理解 gfx-rs。但作为副产品，我也写了这个小教程，以帮助其他人学习 gfx-rs。
+我正在制作一个小玩具，来更好地理解 gfx-rs。但作为副产品，我也写了这个能帮助其他人学习 gfx-rs 的小教程。
 
 ## 入门
 
-让我们写一些编译和运行的东西。
+让我们写一些用来编译和运行的东西。
 
 ```
 $ cargo init sqtoy
 ```
 
-将此添加到`Cargo.toml`：
+将下面代码添加到`Cargo.toml`：
 
 ```toml
 [dependencies]
@@ -69,36 +69,39 @@ pub fn main() {
 }
 ```
 
-如您所见，我们使用 gfx 与 glutin 和 OpenGL。简言之，代码的作用如下：
+如您所见，我们使用 gfx，配上 glutin 和 OpenGL。简言之，代码的作用如下：
 
-1.  创建一个事件循环并准备创建一个标题为“Square Toy”的窗口
-2.  运行`gfx_window_glutin::init()`要得到`glutin::Window`，`gfx_device_gl::Device`和一堆或其他东西
-3.  使用`factory`创造一个`Encoder`这允许您避免调用原始 OpenGL 过程。
+1.  创建一个事件循环，并准备创建一个标题为“Square Toy”的窗口
+2.  运行`gfx_window_glutin::init()`得到`glutin::Window`，`gfx_device_gl::Device`和一堆或其他的东西
+3.  使用`factory`创建一个`Encoder`，这允许您避免调用原始 OpenGL 过程。
 4.  每一帧：
 
-    1.  检查是否是退出的时间
-    2.  用你想要的颜色填充屏幕（它是`BLACK`）
-    3.  实际上做到了。
-    4.  由于我们的缓冲至少是两倍，因此切换缓冲区
+    1.  检查是否为退出的时间
+    2.  用你想要的颜色填充屏幕（它是`BLACK`黑）
+    3.  实际做的。
+    4.  由于我们的缓冲至少是两倍，因此可以切换缓冲区
     5.  清理
 
-大！无论你使用什么，画一个什么都没有的黑色屏幕总是很简单。不幸的是，绘制其他东西通常会有点复杂。在 gfx-rs 中它需要一个管道，顶点，着色器......
+好了！无论你使用什么，它只是简单画一个什么都没有的黑色屏幕。不幸的是，绘制其他东西通常会有点复杂。在 gfx-rs 中它需要一个管道(pipeline)，Vertex (顶点)，着色器(shaders)...
 
 ## gfx-rs 架构概述
 
-![AbstractSingletonProxyFactoryBean](https://i.imgur.com/Dgj7PX8.jpg){title =“一个典型的程序员经验。幸运的是，Gfx-rs 不是那样的。”}Gfx-rs 是一个抽象超过四个低级图形 API 的库：OpenGL（普通和 ES），DirectX，Metal 和 Vulkan。
+![AbstractSingletonProxyFactoryBean](https://i.imgur.com/Dgj7PX8.jpg){title ="一个典型的程序员经验。幸运的是，Gfx-rs 不是这样的。"}
 
-因此，它无法提供直接的 API 来做事。但是它不应该，因为图形 API（特别是像 OpenGL 这样的旧版本）非常冗长，命令式和有状态。它们既不安全也不易于使用。在 gfx-rs 中，一切都围绕三种核心类型构建：
+Gfx-rs 是一个抽象库，基于四个底层图形 API 库：OpenGL（原始和 ES），DirectX，Metal 和 Vulkan。
 
-，`Factory`和`Encoder`。`Device`第一个用于创建东西，第二个是存储要由其执行的图形命令的缓冲区，和`Device`将命令转换为低级 API 调用。`Device`此外，像 DX12 和 Vulcan 之类的 current-get API，但与 OpenGL 不同，管道状态对象（PSO）中封装了管道状态。
+因此，它无法提供直接的 API 。尽管它本就不应该，因为图形 API（特别是像 OpenGL 这样的旧版本）非常冗长，命令式和有状态。它们既不安全也不易于使用。
 
-您可以拥有大量 PSO 并在它们之间切换。但是要创建 PSO，首先必须定义管道并指定顶点属性和制服。有个
+在 gfx-rs 中，一切都围绕三种核心类型构建：
+`Factory`和`Encoder`，还有`Device`。第一个用于创建东西，第二个是缓冲区，存储着由`Device`执行的图形命令，和`Device`将命令转换为底层 API 调用。
 
-很棒的帖子[在 Gfx-rs 博客中更详细地描述了 Gfx-rs 架构。](https://gfx-rs.github.io/2016/09/14/programming-model.html)画一个正方形
+此外，与 OpenGL 不同，但像 DX12 和 Vulcan 之类的当前-获取 API，其管道状态，会在管道状态对象（PSO）中封装。您可以拥有大量 PSO ，并在它们之间切换。但是要创建 PSO，首先必须定义管道，并指定 vertex 属性和形式。
 
-## 我们需要一个管道来在屏幕上绘制任何东西。
+Gfx-rs 博客中有个很棒的[博文](https://gfx-rs.github.io/2016/09/14/programming-model.html)，更详细地描述了 Gfx-rs 架构。
 
-在图形编程中，一切都由三角形组成，三角形由顶点定义。
+## 画一个正方形
+
+我们需要一个管道来在屏幕上绘制任何东西。
 
 ```rust
 gfx_defines! {
@@ -114,11 +117,13 @@ gfx_defines! {
 }
 ```
 
-顶点可以在坐标旁边携带附加信息，我们只有 2D 位置和颜色`a_Pos`。`a_Color`管道只有顶点缓冲区和渲染目标，没有纹理，没有变换，没什么花哨的。GPU 不知道是什么
+在图形编程中，一切都由三角形组成，三角形由 Vertex 定义。
 
-究竟*与顶点和像素应具有的颜色有关。*定义行为着色器*使用。*有两种着色器 vextex 着色器和片段着色器（让我们忽略我们不使用的几何着色器）。两者都在 GPU 上并行执行。顶点着色器在每个顶点上运行并以某种方式转换它。片段着色器在每个片段（通常是像素）上运行，并确定片段将具有的颜色。我们的顶点着色器非常非常简单：
+Vertex 可以在坐标旁边，携带附加信息，我们只有 2D 位置`a_Pos`和颜色`a_Color`。该管道只有 Vertex 缓冲区和渲染目标，没有纹理，没有变换，没什么花哨的。
 
-OpenGL 使用
+GPU 不知道*究竟*要与 Vertex 做什么，和像素应具有什么颜色。要定义*着色器*使用的行为。有两种着色器：Vertex 着色器和片段着色器（让我们忽略我们不使用的几何着色器）。两者都在 GPU 上并行执行。Vertex 着色器在每个 Vertex 上运行，并以某种方式转换它。片段着色器在每个片段（通常是像素）上运行，并确定片段将具有的颜色。
+
+我们的 Vertex 着色器非常非常简单：
 
 ```glsl
 // shaders/rect_150.glslv
@@ -134,7 +139,7 @@ void main() {
 }
 ```
 
-齐次坐标`(x, y, z, w)` [和 RGBA 颜色。](http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/)着色器只是翻译`a_Pos`和`a_Color`进入 OpenGL 的位置和颜色。
+OpenGL 使用`(x, y, z, w)` [齐次坐标](http://www.tomdalling.com/blog/modern-opengl/explaining-homogenous-coordinates-and-projective-geometry/)和 RGBA 颜色。着色器只是将`a_Pos`和`a_Color`转换成 OpenGL 的位置和颜色。
 
 片段着色器更简单：
 
@@ -150,9 +155,9 @@ void main() {
 }
 ```
 
-它只是将像素颜色设置为`v_Color`值[插值](http://www.geeks3d.com/20130514/opengl-interpolation-qualifiers-glsl-tutorial/)从顶点`v_Color`GPU 的价值观。
+它只是将像素颜色设置为`v_Color`值，它通过 GPU， 由 Vertex `v_Color`值[插入](http://www.geeks3d.com/20130514/opengl-interpolation-qualifiers-glsl-tutorial/)。
 
-让我们定义我们的顶点：
+让我们定义我们的 Vertex ：
 
 ```rust
 const WHITE: [f32; 3] = [1.0, 1.0, 1.0];
@@ -164,7 +169,7 @@ const SQUARE: [Vertex; 3] = [
 ];
 ```
 
-并初衷我们绘制所需的一切：
+并初始化我们绘制所需的一切：
 
 ```rust
 let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
@@ -180,7 +185,7 @@ let mut data = pipe::Data {
 };
 ```
 
-以来`main_color`被搬进去了`data`，我们需要更换`&main_color`同`&data.out`到处。然后，在事件循环中，我们绘制：
+因`main_color`(所有权)移动到`data`，我们需要将其他地方的`&main_color`换成`&data.out`。然后，在事件循环中，我们绘制：
 
 ```rust
 encoder.clear(&data.out, BLACK);
@@ -192,9 +197,9 @@ encoder.flush(&mut device);
 
 ![](https://i.imgur.com/7u3ol88.png){width = 600px height = 600px}
 
-这不是一个正方形。它不是正方形的原因很简单：它有三个顶点，所以它必须是一个三角形。另外 OpenGL 对方块一无所知，只能绘制三角形。
+这不是一个正方形。它不是正方形的原因很简单：它是三个 Vertex，所以它必须是一个三角形。另外 OpenGL 对方块一无所知，只能绘制三角形。
 
-您可以添加三个顶点以通过两个三角形绘制正方形。像这样：
+您可以添加另外三个 Vertex，通过两个三角形绘制正方形。像这样：
 
 ```rust
 const SQUARE: [Vertex; 6] = [
@@ -207,11 +212,11 @@ const SQUARE: [Vertex; 6] = [
 ];
 ```
 
-但相反，我们只能定义 4 个顶点并使用元素缓冲区对象重用它们。
+但相反，元素缓冲区对象只能定义 4 个 Vertex，才能重用它们。
 
 ![](http://www.opengl-tutorial.org/assets/images/tuto-9-vbo-indexing/indexing1.png)
 
-所以让我们定义顶点和索引：
+所以，让我们定义 Vertex 和索引：
 
 ```rust
 const SQUARE: &[Vertex] = &[
@@ -239,11 +244,11 @@ let (vertex_buffer, slice) =
 
 ## 走得更远
 
-你应该注意的第一件事是，我们画的正方形实际上是一个矩形：当你调整窗口的比例时，它会改变。这是因为 OpenGL 使用*归一化*X 和 Y 都在-1 到 1 之间的坐标。所以我们需要调整正方形的顶点和窗口的比例。
+你应该注意的第一件事是，我们画的正方形实际上是一个矩形：当你调整窗口的比例时，它会改变。这是因为 OpenGL 使用*标准化*坐标，所以 X 和 Y 都会在 -1 到 1 之间。所以我们需要调整正方形的 Vertex 和窗口的比例。
 
-第二件事是：我们的顶点和索引是预先定义的，并且是常量。我们无法调整它们，也无法快速制作新的正方形。
+第二件事是：我们的 Vertex 和索引是预先定义的，并且是常量。我们无法调整它们，也无法快速制作新的正方形。
 
-让我们解决这两个问题。定义垂直生成器：
+让我们解决这两个问题。定义一个 顶点(Vertex)生成器：
 
 ```rust
 #[derive(Debug, Clone, Copy)]
@@ -253,8 +258,8 @@ struct Square {
     pub color: [f32; 3]
 }
 
-// A cube is a pile of infinitely (as continuum) many squares
-// This data stucture is finite, so we call it “pseudo”
+//立方体(cube)是一堆（连续）无限多的正方形
+//这个数据结构是有限的，所以我们加个“伪（pseudo）”
 #[derive(Debug)]
 struct Pseudocube {
     squares: Vec<Square>,
@@ -347,7 +352,7 @@ pub fn main() {
 }
 ```
 
-伟大的。现在我们的正方形总是正方形。添加光标的时间：
+真棒。现在我们的正方形总是正方形。是时候添加一些光标：
 
 ```rust
 #[derive(Debug, Clone, Copy)]
@@ -437,13 +442,13 @@ impl Pseudocube {
             cube.tick();
 ```
 
-方格被种植：
+方格被扩大：
 
-![](https://i.imgur.com/rumV7tU.png)width=600px height=600px title=“这不是现代艺术。”
+![](https://i.imgur.com/rumV7tU.png){width=600px height=600px title="This is not a modern art."}
 
-## 质地和制服
+## 纹理和形态
 
-所以，你可以画正方形，移动光标，你还需要什么？哦，我明白了。绘图。素色很无聊，对吧？我们加一些吧[纹理](https://learnopengl.com/#!Getting-started/Textures)：
+所以，你可以画正方形，移动光标，你还需要什么？哦，我明白了。图形。纯色很无聊，对吧？我们加一些[纹理](https://learnopengl.com/#!Getting-started/Textures)吧：
 
 ```rust
 gfx_defines! {
@@ -461,15 +466,15 @@ gfx_defines! {
 }
 ```
 
-这里有两个变化。第一个是：顶点得到了一个新数据：`a_Uv`. 如果你认为这只意味着一件事，你是对的：是的，GPU 不知道如何*确切地*绘制纹理。是的，我们使用片段着色来确定行为。`a_Uv`是纹理片段的坐标。
+这里有两个变化。第一个是：Vertex 得到了一个新数据：`a_Uv`。如果你认为这只意味着一件事，你是对的：是的，GPU 不知道如何*确切地*绘制纹理。是的，我们使用片段着色器来确定行为。`a_Uv`是纹理片段的坐标。
 
-第二个变化是`t_Awesome`管道中的纹理。使用此管道绘制的所有三角形的纹理都相同。但是如果你想让不同的正方形看起来不同怎么办？嗯，有三种方法。第一种方法是为每个方块切换纹理。这种方法很慢，因为它要求每个方块都有一个绘制调用，不能用一个调用绘制所有内容。第二种方法是把所有的东西都放在一个大的纹理（纹理地图集）中，并使用 UV 坐标从地图集中获取纹理。第三种方法是使用纹理数组（如果支持的话）。
+第二个变化是介绍管道中的`t_Awesome`纹理。而这会让，此管道绘制的所有三角形的纹理都相同。但是如果你想让不同的正方形看起来不同怎么办？嗯，有三种方法。第一种方法是为每个方块切换纹理。这种方法很慢，因为它要求每个方块都有一个绘制调用，而不能用一个调用绘制所有内容。第二种方法是把所有的东西都放在一个大的纹理（纹理地图集）中，并使用 UV 坐标从地图集中获取纹理。第三种方法是使用纹理数组（如果支持的话）。
 
 我们将使用这两种方法，因此我们的方块将具有相同的简单纹理：
 
-![](https://i.imgur.com/40VzkBZ.jpg)title=“：太棒了：”
+![](https://i.imgur.com/40VzkBZ.jpg){title=":awesome:"}
 
-所以让我们来纹理我们的方块。为此，我们需要一个板条箱来装载图像：
+所以让我们来纹理化我们的方块。为此，我们需要一个箱子来加载图像：
 
 ```toml
 [dependencies]
@@ -514,7 +519,7 @@ void main() {
 }
 ```
 
-复制粘贴函数[另一个教程](https://wiki.alopex.li/LearningGfx)：
+复制粘贴[另一个教程](https://wiki.alopex.li/LearningGfx)的函数：
 
 ```rust
 fn load_texture<F, R>(factory: &mut F, path: &str) -> gfx::handle::ShaderResourceView<R, [f32; 4]>
@@ -528,7 +533,7 @@ fn load_texture<F, R>(factory: &mut F, path: &str) -> gfx::handle::ShaderResourc
 }
 ```
 
-向顶点添加 UV 坐标：
+向 Vertex 添加 UV 坐标：
 
 ```rust
 Vertex { pos: [pos.0 + hx, pos.1 - hy], uv: [1.0, 0.0], color: sq.color },
@@ -552,11 +557,11 @@ Vertex { pos: [pos.0 + hx, pos.1 + hy], uv: [1.0, 1.0], color: sq.color },
 
 Ta da：
 
-![](https://i.imgur.com/jeKLvoc.png)宽度=600px 高度=600px
+![](https://i.imgur.com/jeKLvoc.png){width=600px height=600px}
 
 哦，不。黑色仍然是黑色的，图像是颠倒的。首先是图像本身的缺陷（这就是从互联网下载 jpeg 所得到的），但是为什么它是颠倒的呢？
 
-嗯，原因很简单。图像坐标为 Y 轴上下，而在 OpenGL 中，Y 轴总是上下。所以最明显的解决方法就是翻转图像。但有一个更简单的方法：我们可以翻转 UV 坐标。
+嗯，原因很简单。图像坐标为 Y 轴是上到下，而在 OpenGL 中，Y 轴总是下到上。所以最明显的解决方法就是翻转图像。但有一个更简单的方法：我们可以翻转 UV 坐标。
 
 ```rust
 Vertex { pos: [pos.0 + hx, pos.1 - hy], uv: [1.0, 1.0], color: sq.color },
@@ -567,11 +572,11 @@ Vertex { pos: [pos.0 + hx, pos.1 + hy], uv: [1.0, 0.0], color: sq.color },
 
 然后。。。
 
-![](https://i.imgur.com/8li9Csm.png)width=600px height=600px title=“真的：太棒了：”
+![](https://i.imgur.com/8li9Csm.png){width=600px height=600px title="Really :awesome:"}
 
-伟大的！但如果你更喜欢纯色呢？我们需要一个开关。我们需要一件制服。
+真棒！但如果你更喜欢纯色呢？我们需要一个开关。我们需要一致性。
 
-制服是着色器的全局常量。它们用于将各种信息传递到明暗器：转换信息、鼠标位置或某种开关。在 gfx-rs 中有两种创建统一的方法，第一种方法是在管道中声明一个值，如下所示：
+一致性(uniform/制服)是着色器的全局常量。它们用于将各种信息传递到着色器：转换材料、鼠标位置或某种开关。在 gfx-rs 中，有两种创建统一的方法，第一种方法是在管道中声明一个值，如下所示：
 
 ```rust
 switch: gfx::Global<i32> = "i_Switch",
@@ -586,9 +591,9 @@ constant Globals {
 }
 ```
 
-然后创建一个常量缓冲区。我们将使用第一种方法，因为它是最简单的方法。
+然后，创建一个常量缓冲区。我们将使用第一种方法，因为它是最简单的方法。
 
-让我们稍微改变一下材质球：
+让我们稍微改变一下着色器：
 
 ```glsl
     if(i_Switch == 0) {
@@ -622,24 +627,24 @@ let mut data = pipe::Data {
         },
 ```
 
-我们结束了。
+好了完成。
 
 ## 结论
 
-编程是数据转换的艺术。图形编程就是这样一个很好的例子：GPU 本身没有魔力。您必须向它提供顶点数据并定义转换（明暗器），以便它能够以简单直接的方式将此数据转换为另一种数据：屏幕上显示的像素数组。
+编程是数据转换的艺术。图形编程就是这样一个很好的例子：GPU 本身没有魔力。您必须向它提供 Vertex 数据，并定义转换器（着色器），以便它能够以简单直接的方式，将此数据转换为另一种数据：屏幕上显示的像素数组。
 
-gfx-rs 是一个很好的库，可以帮助您完成这个任务。它提供了一个简单但清晰的*乡村的*与 GPU 交互的方式。尽管由于缺乏足够的文档，文档看起来很吓人，但是 API 本身非常简单且易于使用。
+gfx-rs 是一个很好的库，可以帮助您完成这个任务。它提供了一个简单但清晰的，与 GPU 交互的*rust 风格*方式。尽管由于缺乏足够的文档，文档看起来很吓人，但是 API 本身非常简单。且易于使用。
 
-关于 gfx-rs 的文章太少，几乎没有教程。我希望这个小小的教程将帮助其他人进入生锈的图形编程，并使学习不那么陡峭。
+关于 gfx-rs 的文章太少，几乎没有教程。我希望这个小小的教程。将帮助其他人进入 Rist 的图形编程，并使学习不那么陡峭。
 
 ## 资源
 
 OpenGL 有两个很好的来源：[学习 OpenGL](https://learnopengl.com/)和[OpenGL 教程](http://opengl-tutorial.org/). 它们详细地解释了基本的图形编程原理，提供了很好的示例和说明。
 
-我也强烈建议你[gfx 卢比吉特](https://gitter.im/gfx-rs/gfx). 这不仅是欢迎，而且是非常有帮助的，没有他们的帮助，写这个教程会更加困难。
+我也强烈建议你[gfx gitter](https://gitter.im/gfx-rs/gfx). 这不仅是欢迎，而且是非常有帮助的，没有他们的帮助，写这个教程会更加困难。
 
-[《阴影之书》](https://thebookofshaders.com/)是一本关于碎片碎片碎片的好书。它不仅是关于着色程序的艺术，而且是关于着色程序的*艺术*. 遮影器不仅是 AAA 游戏中的图形，也是艺术家的工具。这本书有许多美丽的例子，会把你介绍到[创造性编码](https://github.com/terkelg/awesome-creative-coding).
+[《阴影之书》/ 着色器之书](https://thebookofshaders.com/)是一本关于片段着色器的好书。它不仅是关于着色编程的艺术，而且是关于可称之为艺术的着色程序。着色器不仅是 AAA 游戏中的图形，也是艺术家的工具。这本书有许多美丽的例子，会把你引入[创造性编码](https://github.com/terkelg/awesome-creative-coding)世界。
 
 ## 源代码
 
-sqtoy 的源代码可用[在 Github 上](https://github.com/suhr/sqtoy). 本教程的源代码是[可获得的](https://github.com/suhr/gsgt)也在 Github 上。拉请求是受欢迎的，尤其是拉请求到教程：我既不是一个好作家，也不是一个好的英语演说家，所以可能有很多事情需要改进。
+sqtoy 的源代码可用[在 Github 上](https://github.com/suhr/sqtoy)。 本教程文章的源代码也在 Github 上[可获得的](https://github.com/suhr/gsgt)。拉取请求是受欢迎的，尤其是拉取请求到教程：我既不是一个好作家，也不是一个好的英语演说家，所以可能有很多事情需要改进。
