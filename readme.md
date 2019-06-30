@@ -9,7 +9,7 @@
 [size-img]: https://packagephobia.now.sh/badge?p=Name
 [size]: https://packagephobia.now.sh/result?p=Name
 
-「 正方形的图形：Gfx-rs 教程 」
+「 正方形的图形：Gfx-rs 教程，**注意原项目日期** 」
 
 [中文](./readme.md) | [english](https://github.com/suhr/gsgt)
 
